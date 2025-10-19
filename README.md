@@ -6,4 +6,4 @@
 
 - Node.js 버전
   - macOS : **v22.20.0**
-  - Windows
+  - Windows : **v22.11.0**
