@@ -1,52 +1,34 @@
 import SearchableLayout from "@/components/searchable-layout";
-import style from "./index.module.css";
 import { ReactNode } from "react";
 import BookItem from "@/components/book-item";
-import { InferGetServerSidePropsType } from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import fetchBooks from "@/lib/fetch-books";
-import fetchRandomBooks from "@/lib/fetch-random-books";
 
-export const getServerSideProps = async () => {
-  // 컴포넌트보다 먼저 실행됨, 컴포넌트에 필요한 데이터 불러옴
-
-  // const allBooks = await fetchBooks();
-  // const recoBooks = await fetchRandomBooks(); 직렬정인 API 호출 방식
-
-  const [allBooks, recoBooks] = await Promise.all([
-    fetchBooks(),
-    fetchRandomBooks(),
-  ]);
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const q = context.query.q;
+  const books = await fetchBooks(q as string);
 
   return {
     props: {
-      allBooks,
-      recoBooks,
+      books,
     },
   };
 };
 
-export default function Home({
-  allBooks,
-  recoBooks,
+export default function Page({
+  books,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <div className={style.container}>
-      <section>
-        <h3>지금 추천하는 도서</h3>
-        {recoBooks.map((book) => (
-          <BookItem key={book.id} {...book} />
-        ))}
-      </section>
-      <section>
-        <h3>등록된 모든 도서</h3>
-        {allBooks.map((book) => (
-          <BookItem key={book.id} {...book} />
-        ))}
-      </section>
+    <div>
+      {books.map((book) => (
+        <BookItem key={book.id} {...book} />
+      ))}
     </div>
   );
 }
 
-Home.getLayout = (page: ReactNode) => {
+Page.getLayout = (page: ReactNode) => {
   return <SearchableLayout>{page}</SearchableLayout>;
 };
